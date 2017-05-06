@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,9 +19,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Created by 张帆 on 2017/4/30.
+ */
+
+
+
 public class fivechess extends View
 {
-
     private Paint mypait=new Paint();
     private Bitmap white;
     private Bitmap black;
@@ -148,18 +152,20 @@ public class fivechess extends View
                 } else*/
                 {
                     map[(int) (y / lineHeight)][(int) (x / lineHeight)] = 2;
-                    check((int) (y / lineHeight), (int) (x / lineHeight));
+
                     invalidate();
                     ai();
+
                     //BorW = !BorW;
                 }
+                check((int) (y / lineHeight), (int) (x / lineHeight));
                 invalidate();
                 return true;
             }
-
+            invalidate();
             return true;
         }
-
+        invalidate();
         return super.onTouchEvent(event);
     }
 
@@ -167,18 +173,16 @@ public class fivechess extends View
 
     private void ai()
     {
-
-        //递归深度
-        int depth=0;
-        int map1[][]=new int[max_line][max_line];
+       int map1[][]=new int[max_line][max_line];
         for (int i=0;i<max_line;i++)
         {
             for (int j=0;j<max_line;j++)
             {
                 if (map[i][j]==0)
                 {
-                    map1[i][j]+=minmax(i,j,evalu(i,j,map),depth,map);
+                    map1[i][j]+=evalu(i,j);
                 }
+
             }
         }
         int x=5;
@@ -197,140 +201,14 @@ public class fivechess extends View
             }
         }
         map[x][y]=1;
+        invalidate();
         check(x,y);
     }
 
-
-    //minmax搜索，α-β剪枝
-    /*Alpha-beta剪枝顾名思义就是裁剪掉一些不必要的分支，以减少遍历的节点数。
-    实际上是通过传递两个参数alpha和beta到递归的极小极大函数中
-    alpha表示了MAX的最坏情况，beta表示了MIN的最坏情况，因此他们的初始值为负无穷和正无穷。
-    在递归的过程中，在轮到MAX的回合，如果极小极大的值比alpha大，则更新alpha；
-    在MIN的回合中，如果极小极大值比beta小，则更新beta。
-    当alpha和beta相交时（即alpha>=beta）这时该节点的所有子节点对于MAX和MIN双方都不会带来好的获益
-    所以可以忽略掉（裁剪掉）以该节点为父节点的整棵子树。*/
-    private int minmax(int l, int h,int evalu,int depth,int[][] mapp)
-    {
-        int sum=0;
-        if (depth==0)
-        {
-            return sum=evalu(l,h,mapp);
-        }else
-        {
-            if (depth%2!=0)    //对方
-            {
-                int[][] mapvalue=new int[max_line][max_line];
-                depth--;
-                int mapc[][]=new int[max_line][max_line];
-                mapc[l][h]=1;
-                for (int ii=0;ii<max_line;ii++)             //黑白互换
-                {
-                    for (int jj=0;jj<max_line;jj++)
-                    {
-                        if (mapp[ii][jj]==0)
-                        {
-                            mapc[ii][jj]=mapp[ii][jj];
-                        }else
-                        {
-                            if (mapp[ii][jj]==1)
-                            {
-                                mapc[ii][jj]=2;
-                            }else
-                            {
-                                mapc[ii][jj]=1;
-                            }
-                        }
-                    }
-                }
-
-                for (int i=0;i<max_line;i++)
-                {
-                    for (int j=0;j<max_line;j++)
-                    {
-                        if (mapc[i][j]==0)
-                        {
-                            mapvalue[i][j]+=minmax(i,j,evalu(i,j,mapc),depth,mapc);
-                        }
-                    }
-                }
-
-                int x=5;
-                int y=5;
-                int max=0;
-                for (int i=0;i<max_line;i++)
-                {
-                    for (int j=0;j<max_line;j++)
-                    {
-                        if (mapvalue[i][j]>max)
-                        {
-                            max=mapc[i][j];
-                            x=i;
-                            y=j;
-                        }
-                    }
-                }
-                return sum=-max;
-
-            }
-            else               //己方
-            {
-                int[][] mapvalue=new int[max_line][max_line];
-                depth--;
-                int mapc[][]=new int[max_line][max_line];
-                mapc[l][h]=2;
-                for (int ii=0;ii<max_line;ii++)             //黑白互换
-                {
-                    for (int jj=0;jj<max_line;jj++)
-                    {
-                        if (mapp[ii][jj]==0)
-                        {
-                            mapc[ii][jj]=mapp[ii][jj];
-                        }else
-                        {
-                            if (mapp[ii][jj]==1)
-                            {
-                                mapc[ii][jj]=2;
-                            }else
-                            {
-                                mapc[ii][jj]=1;
-                            }
-                        }
-                    }
-                }
-
-                for (int i=0;i<max_line;i++)
-                {
-                    for (int j=0;j<max_line;j++)
-                    {
-                        if (mapc[i][j]==0)
-                        {
-                            mapvalue[i][j]+=minmax(i,j,evalu(i,j,mapc),depth,mapc);
-                        }
-                    }
-                }
-                int x=5;
-                int y=5;
-                int max=0;
-                for (int i=0;i<max_line;i++)
-                {
-                    for (int j=0;j<max_line;j++)
-                    {
-                        if (mapvalue[i][j]>max)
-                        {
-                            max=mapc[i][j];
-                            x=i;
-                            y=j;
-                        }
-                    }
-                }
-                return sum=max;
-            }
-        }
-    }
-
+    
 
     //评估函数
-    private int evalu(int i, int j,int [][] mapcopy1)
+    private int evalu(int i, int j)
     {
         int sum=0;
         //设计时竟然忘了黑棋，啪啪啪的打脸啊，要学会写文档。
@@ -346,7 +224,7 @@ public class fivechess extends View
                 heng=heng+"1";
             }else
             {
-                heng=heng+mapcopy1[i][y];
+                heng=heng+map[i][y];
             }
 
         }
@@ -360,7 +238,7 @@ public class fivechess extends View
                 shu=shu+"1";
             }else
             {
-                shu=shu+mapcopy1[y][j];
+                shu=shu+map[y][j];
             }
         }
         h=onelinejudge(shu,i,j);
@@ -385,7 +263,7 @@ public class fivechess extends View
             }
             else
             {
-                aa=aa+mapcopy1[x1][y1];
+                aa=aa+map[x1][y1];
             }
         }
         a=onelinejudge(aa,i,j);
@@ -411,7 +289,7 @@ public class fivechess extends View
             }
             else
             {
-                bb=bb+mapcopy1[x2][y2];
+                bb=bb+map[x2][y2];
             }
         }
         b=onelinejudge(bb,i,j);
@@ -425,12 +303,12 @@ public class fivechess extends View
         {
             for (int jj=0;jj<max_line;jj++)
             {
-                if (mapcopy1[ii][jj]==0)
+                if (map[ii][jj]==0)
                 {
                     mapcopy[ii][jj]=0;
                 }else
                 {
-                    if (mapcopy1[ii][jj]==1)
+                    if (map[ii][jj]==1)
                     {
                         mapcopy[ii][jj]=2;
                     }else
@@ -942,23 +820,15 @@ public class fivechess extends View
                 .setNegativeButton("退出",
                         new DialogInterface.OnClickListener()
                         {
+
                             public void onClick(DialogInterface dialog, int which)
                             {
 
-                                System.exit(1);
                             }
                         }).show();
     }
 
     private void restart()
     {
-        for (int i=0;i<max_line;i++)
-        {
-            for (int j=0; j < max_line; j++)
-            {
-                map[i][j]=0;
-            }
-        }
-        invalidate();
     }
 }
