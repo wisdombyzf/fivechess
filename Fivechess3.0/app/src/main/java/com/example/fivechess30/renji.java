@@ -134,18 +134,11 @@ public class renji extends View
             int y = (int) event.getY();
             if (map[(int) (y / lineHeight)][(int) (x / lineHeight)] == 0)
             {
-              /*  if (BorW)
-                {
-
-                    map[(int) (y / lineHeight)][(int) (x / lineHeight)] = 1;
-                    BorW = !BorW;
-                } else*/
                 {
                     map[(int) (y / lineHeight)][(int) (x / lineHeight)] = 2;
                     check((int) (y / lineHeight), (int) (x / lineHeight));
                     invalidate();
                     ai();
-                    //BorW = !BorW;
                 }
                 invalidate();
                 return true;
@@ -193,6 +186,7 @@ public class renji extends View
         check(x, y);
     }
 
+    //为什么耗时这么久？？？？？？？根本不可能进行minmax搜索α-β剪枝啊  放弃了.....
 
     //minmax搜索，α-β剪枝
     /*Alpha-beta剪枝顾名思义就是裁剪掉一些不必要的分支，以减少遍历的节点数。
@@ -902,7 +896,6 @@ public class renji extends View
         Dialog("黑方胜");
     }
 
-    //未完成
     private void Dialog(String string)
     {
         new AlertDialog.Builder(getContext()).setTitle(string)
@@ -943,7 +936,7 @@ public class renji extends View
                 map[i][j] = 0;
             }
         }
-        gameover=true;
+        gameover=false;
         invalidate();
     }
 }

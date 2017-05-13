@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private void renrenduizhan()
     {
         Intent i=new Intent();
-        i.setClass(this,renrenduizhan.class);
+        i.setClass(this,login.class);
         startActivity(i);
     }
 

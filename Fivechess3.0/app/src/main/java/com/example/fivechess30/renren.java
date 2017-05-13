@@ -1,5 +1,6 @@
 package com.example.fivechess30;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,48 +8,221 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpCookie;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Handler;
 
 /**
- * Created by 张帆 on 2017/5/7.
+ * Created by 张帆 on 2017/5/12.
  */
 
-public class renren extends View
-{
-
+public class renren extends View {
     private Paint mypait = new Paint();
     private Bitmap white;
     private Bitmap black;
     private float lineHeight;
     private int panewidth;
     private int max_line = 10;//棋盘总格数
-    private int map[][] = new int[max_line][max_line];//0为空，1为白，2为黑
     boolean BorW = true;//下棋的颜色.,白色为true,人人对战需要
-    private boolean gameover=false;
+    private boolean gameover = false;
+    public int map[][] = new int[max_line][max_line];//0为空，1为白，2为黑
+    private boolean wite = true;
+    private int id = 0;
+    private int tmp = 0;
+    int color = 1314520;
 
 
-
-    public renren(Context context, AttributeSet attrs)
-    {
+    public renren(Context context, AttributeSet attrs) {
         super(context, attrs);
-        //setBackgroundColor(0x440000ff);
         ini();
     }
 
-    public void ini()
-    {
+
+    public void ini() {
         mypait.setColor(0xff000000);
         mypait.setAntiAlias(true);
         mypait.setDither(true);
         mypait.setStyle(Paint.Style.STROKE);
         white = BitmapFactory.decodeResource(getResources(), R.drawable.stone_w2);
         black = BitmapFactory.decodeResource(getResources(), R.drawable.stone_b1);
+        class sethread extends Thread {
+            @Override
+            public void run() {
+                super.run();
+                changehttp();
+            }
 
+            private void changehttp() {
+                String aa;
+                if (tmp == 1) {
+                    aa = "http://www.cxyzf.cn/apptest.php?id=0&zuobiao=0";
+                } else {
+                    aa = "http://www.cxyzf.cn/apptest.php?id=0&zuobiao=0";
+                }
+                try {
+                    URL mm = new URL(aa);
+                    HttpURLConnection con2 = (HttpURLConnection) mm.openConnection();
+                    con2.connect();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con2.getInputStream()));
+                    String line;
+                    int aaa = 0;
+                    while ((line = in.readLine()) != null) {
+                        aaa = Integer.parseInt(line);
+                    }
+                }
+                catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        class firthread extends Thread {
+            @Override
+            public void run() {
+                super.run();
+                httpini();
+            }
+
+            private void httpini() {
+                String m = "http://www.cxyzf.cn/apptest.php";
+                try {
+                    URL myurl = new URL(m);
+                    HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                    con.connect();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String line;
+                    int aaa = 0;
+                    while ((line = in.readLine()) != null) {
+                        aaa = Integer.parseInt(line);
+                    }
+                    if (aaa == 10000) {
+                        BorW = true;
+                        id = 1;
+                        tmp = 2;
+                    } else {
+                        BorW = false;
+                        id = 2;
+                        tmp = 1;
+                    }
+                }
+                catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        class thirdthread extends Thread {
+            @Override
+            public void run() {
+                int aa = 0;
+                int color = 0;
+                int httpcoluom = 0;
+                int httpline = 0;
+                super.run();
+                do {
+                    String pp;
+                    pp = "http://www.cxyzf.cn/apptest.php";
+                    URL myurl = null;
+                    try {
+                        myurl = new URL(pp);
+                        HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                        con.connect();
+                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            aa = Integer.parseInt(line);
+                        }
+                        color = aa / 10000;
+                        httpcoluom = (aa % 10000) / 100;
+                        httpline = (aa % 100);
+                        map[httpcoluom][httpline] = color;
+                        handler.sendEmptyMessage(0x123);
+                    }
+                    catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } while ((true));
+            }
+        }
+
+        Thread t1 = new firthread();
+        t1.start();
+        try {
+            t1.join();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Thread t2 = new sethread();
+        t2.start();
+        try {
+            t2.join();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Thread t3 = new thirdthread();
+        t3.start();
+        updata();
+    }
+
+
+    public void updata()
+    {
+        class thirdthread extends Thread {
+            @Override
+            public void run() {
+                int aa = 0;
+                int color = 0;
+                int httpcoluom = 0;
+                int httpline = 0;
+                super.run();
+                do {
+                    String pp;
+                    pp = "http://www.cxyzf.cn/apptest.php";
+                    URL myurl = null;
+                    try {
+                        myurl = new URL(pp);
+                        HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                        con.connect();
+                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            aa = Integer.parseInt(line);
+                        }
+                        color = aa / 10000;
+                        httpcoluom = (aa % 10000) / 100;
+                        httpline = (aa % 100);
+                        map[httpcoluom][httpline] = color;
+                        handler.sendEmptyMessage(0x123);
+                    }
+                    catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } while ((color!=9988770));
+            }
+        }
+        new thirdthread().start();
     }
 
     @Override
@@ -132,36 +306,103 @@ public class renren extends View
     public boolean onTouchEvent(MotionEvent event)
     {
         //关于事件的传递，暂时还没有弄懂，只知道要这样写
-
-        if ((event.getAction() == MotionEvent.ACTION_DOWN)&&!gameover)
+        if ((event.getAction() == MotionEvent.ACTION_DOWN)&&!gameover&&wite)
         {
-            int x = (int) event.getX();
-            int y = (int) event.getY();
+            final int x = (int) event.getX();
+            final int y = (int) event.getY();
             if (map[(int) (y / lineHeight)][(int) (x / lineHeight)] == 0)
             {
-              if (BorW)
+                wite=false;
+                int ccccc=1;
+                if (BorW)
                 {
-
-                    map[(int) (y / lineHeight)][(int) (x / lineHeight)] = 1;
-                    check((int) (y / lineHeight), (int) (x / lineHeight));
-                    invalidate();
-                    BorW = !BorW;
-                } else
+                    ccccc=1;
+                }else
                 {
-                    map[(int) (y / lineHeight)][(int) (x / lineHeight)] = 2;
-                    check((int) (y / lineHeight), (int) (x / lineHeight));
-                    invalidate();
-                    BorW = !BorW;
+                    ccccc=2;
                 }
-                invalidate();
+                map[(int) (y / lineHeight)][(int) (x / lineHeight)] = ccccc;
+                check((int) (y / lineHeight), (int) (x / lineHeight));
+                    new Thread()
+                    {
+                        @Override
+                        public void run() {
+                            super.run();
+                            httpget();
+                        }
+                        private void httpget()
+                        {
+                            int aa=0;
+                            int qise=0;
+                            if (BorW)
+                            {
+                                qise=10000;
+                            }else
+                            {
+                                qise=20000;
+                            }
+                            int message=qise+(int) (y / lineHeight)*100+ (int) (x / lineHeight);
+                            try {
+                                int httpcoluom = 0;
+                                int httpline=0;
+
+                                do {
+                                    String pp;
+                                    wite=false;
+                                    if (id==1)
+                                    {
+                                        pp = "http://www.cxyzf.cn/apptest.php?id=1&zuobiao="+message;  //为什么连加不行，de了一下午的bug
+                                    }else
+                                    {
+                                        pp = "http://www.cxyzf.cn/apptest.php?id=2&zuobiao="+message;
+                                    }
+                                    URL myurl = new URL(pp);
+                                    HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                                    con.connect();
+                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                                    String line;
+                                    while ((line = in.readLine()) != null) {
+                                        aa = Integer.parseInt(line);
+                                    }
+                                    // TODO: 2017/5/12  五位数代表颜色-纵坐标-横坐标，0为初始，1为白，2为黑，10204代表三列5行的白棋
+                                    color = aa / 10000;
+                                    httpcoluom = (aa % 10000) / 100;
+                                    httpline = (aa % 100);
+                                    map[httpcoluom][httpline]=color;
+                                    //handler.sendEmptyMessage(0x123);
+                                    //invalidate();
+                                }while ((color==id)||(color==0));
+                                wite=true;
+                            }
+                            catch (MalformedURLException e) {
+                                e.printStackTrace();
+                            }
+                            catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }.start();
                 return true;
             }
-
             return true;
         }
-
         return super.onTouchEvent(event);
     }
+
+   android.os.Handler handler = new android.os.Handler()
+   {
+       @Override
+       public void handleMessage(Message msg)
+       {
+           if(msg.what == 0x123)
+           {
+               invalidate();
+           }
+       }
+   };
+
+
 
     private void check(int x, int y)
     {
@@ -368,4 +609,3 @@ public class renren extends View
         invalidate();
     }
 }
-
