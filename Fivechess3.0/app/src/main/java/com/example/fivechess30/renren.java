@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -25,6 +26,10 @@ import java.util.logging.Handler;
 /**
  * Created by 张帆 on 2017/5/12.
  */
+/*线程要结束后才会统一结算。。。。。总共卡了三天半，终于解决了ヾ(o◕∀◕)ﾉヾ
+* 估计也只有我自己能看懂我写的什么.........
+*
+* */
 
 public class renren extends View {
     private Paint mypait = new Paint();
@@ -323,66 +328,121 @@ public class renren extends View {
                 }
                 map[(int) (y / lineHeight)][(int) (x / lineHeight)] = ccccc;
                 check((int) (y / lineHeight), (int) (x / lineHeight));
-                    new Thread()
-                    {
-                        @Override
-                        public void run() {
-                            super.run();
-                            httpget();
-                        }
-                        private void httpget()
+                new Thread()
+                {
+                    @Override
+                    public void run() {
+                        super.run();
+                        inihttp();
+                    }
+
+                    private void inihttp() {
+                        int aa=0;
+                        int qise=0;
+                        if (BorW)
                         {
-                            int aa=0;
-                            int qise=0;
-                            if (BorW)
-                            {
-                                qise=10000;
-                            }else
-                            {
-                                qise=20000;
-                            }
-                            int message=qise+(int) (y / lineHeight)*100+ (int) (x / lineHeight);
-                            try {
-                                int httpcoluom = 0;
-                                int httpline=0;
-
-                                do {
-                                    String pp;
-                                    wite=false;
-                                    if (id==1)
-                                    {
-                                        pp = "http://www.cxyzf.cn/apptest.php?id=1&zuobiao="+message;  //为什么连加不行，de了一下午的bug
-                                    }else
-                                    {
-                                        pp = "http://www.cxyzf.cn/apptest.php?id=2&zuobiao="+message;
-                                    }
-                                    URL myurl = new URL(pp);
-                                    HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
-                                    con.connect();
-                                    BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                                    String line;
-                                    while ((line = in.readLine()) != null) {
-                                        aa = Integer.parseInt(line);
-                                    }
-                                    // TODO: 2017/5/12  五位数代表颜色-纵坐标-横坐标，0为初始，1为白，2为黑，10204代表三列5行的白棋
-                                    color = aa / 10000;
-                                    httpcoluom = (aa % 10000) / 100;
-                                    httpline = (aa % 100);
-                                    map[httpcoluom][httpline]=color;
-                                    //handler.sendEmptyMessage(0x123);
-                                    //invalidate();
-                                }while ((color==id)||(color==0));
-                                wite=true;
-                            }
-                            catch (MalformedURLException e) {
-                                e.printStackTrace();
-                            }
-                            catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
+                            qise=10000;
+                        }else
+                        {
+                            qise=20000;
                         }
-                    }.start();
+                        int message=qise+(int) (y / lineHeight)*100+ (int) (x / lineHeight);
+                        int httpcoluom = 0;
+                        int httpline=0;
+                        String pp;
+                        if (id==1)
+                        {
+                            pp = "http://www.cxyzf.cn/apptest.php?id=1&zuobiao="+message;
+                        }else
+                        {
+                            pp = "http://www.cxyzf.cn/apptest.php?id=2&zuobiao="+message;
+                        }
+                        try {
+                            URL myurl = new URL(pp);
+                            HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                            con.connect();
+                            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                            String line;
+                            while ((line = in.readLine()) != null) {
+                                aa = Integer.parseInt(line);
+                            }
+                            // TODO: 2017/5/12  五位数代表颜色-纵坐标-横坐标，0为初始，1为白，2为黑，10204代表三列5行的白棋
+                            color = aa / 10000;
+                            httpcoluom = (aa % 10000) / 100;
+                            httpline = (aa % 100);
+                            map[httpcoluom][httpline]=color;
+                            check(httpcoluom,httpline);
+                        }
+                        catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+
+                class setqi extends Thread{
+                    @Override
+                    public void run() {
+                        super.run();
+                        httpget();
+                    }
+                    private void httpget()
+                    {
+                        int aa=0;
+                        int qise=0;
+                        if (BorW)
+                        {
+                            qise=10000;
+                        }else
+                        {
+                            qise=20000;
+                        }
+                        int message=qise+(int) (y / lineHeight)*100+ (int) (x / lineHeight);
+                        try {
+                            int httpcoluom = 0;
+                            int httpline=0;
+
+                            do {
+                                String pp;
+                                wite=false;
+                                if (id==1)
+                                {
+                                    pp = "http://www.cxyzf.cn/apptest.php?id=1&zuobiao="+message;  //为什么连加不行，de了一下午的bug
+                                }else
+                                {
+                                    pp = "http://www.cxyzf.cn/apptest.php?id=2&zuobiao="+message;
+                                }
+                                URL myurl = new URL(pp);
+                                HttpURLConnection con = (HttpURLConnection) myurl.openConnection();
+                                con.connect();
+                                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                                String line;
+                                while ((line = in.readLine()) != null) {
+                                    aa = Integer.parseInt(line);
+                                }
+                                // TODO: 2017/5/12  五位数代表颜色-纵坐标-横坐标，0为初始，1为白，2为黑，10204代表三列5行的白棋
+                                color = aa / 10000;
+                                httpcoluom = (aa % 10000) / 100;
+                                httpline = (aa % 100);
+                                map[httpcoluom][httpline]=color;
+                                //handler.sendEmptyMessage(0x123);
+                                //invalidate();
+                            }while ((color==id)||(color==0)||(gameover));
+                            wite=true;
+                        }
+                        catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+                Thread set1=new setqi();
+                set1.start();
                 return true;
             }
             return true;
@@ -556,14 +616,39 @@ public class renren extends View {
     {
         gameover=true;
         Dialog("白方胜");
+        ResetPhp();
+
     }
 
     private void Bwin()
     {
         gameover=true;
         Dialog("黑方胜");
+        ResetPhp();
+
     }
 
+    private void ResetPhp()         //重置PHP
+    {
+        new Thread()
+        {
+            @Override
+            public void run() {
+                super.run();
+                try {
+                    URL re=new URL("http://www.cxyzf.cn/apptest.php?id=0&zuobiao=0");
+                    HttpURLConnection con= (HttpURLConnection) re.openConnection();
+                    con.connect();
+                }
+                catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
     //未完成
     private void Dialog(String string)
     {
@@ -590,7 +675,6 @@ public class renren extends View {
                         {
                             public void onClick(DialogInterface dialog, int which)
                             {
-
                                 System.exit(1);
                             }
                         }).show();
